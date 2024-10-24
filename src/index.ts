@@ -1,14 +1,22 @@
 import express, { Express, Request, Response } from "express";
 import authRoutes from "./routes/authRoutes";
+import "dotenv/config";
+import taskRoutes from "./routes/tasksRoutes";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-// Middleware for parsing JSON bodies
 app.use(express.json());
+app.use(cookieParser());
+
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms"),
+);
 
 app.use("/auth", authRoutes);
-// app.use("/auth/tasks", taskRoutes);
+app.use("/tasks", taskRoutes);
 // app.use("/auth/profile", profileRoutes);
 
 // Basic route

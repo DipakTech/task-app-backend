@@ -1,17 +1,19 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import bcrypt from "bcrypt";
 import { validateEmail } from "../utils/validation";
 import { prisma } from "../db";
 import { createAccessToken } from "../utils/jwtToken";
 
-export const register = async (
+export const register: RequestHandler = async (
   req: Request,
   res: Response,
-): Promise<Response> => {
+): Promise<void> => {
   try {
     const { name, email, password } = req.body;
+
     if (!name || !email || !password) {
-      return res.status(400).json({ msg: "Please fill all the fields" });
+      res.status(400).json({ msg: "Please fill all the fields" });
+      return;
     }
 
     if (
@@ -19,17 +21,20 @@ export const register = async (
       typeof email !== "string" ||
       typeof password !== "string"
     ) {
-      return res.status(400).json({ msg: "Please send string values only" });
+      res.status(400).json({ msg: "Please send string values only" });
+      return;
     }
 
     if (password.length < 4) {
-      return res
-        .status(400)
-        .json({ msg: "Password length must be atleast 4 characters" });
+      res.status(400).json({
+        msg: "Password length must be atleast 4 characters",
+      });
+      return;
     }
 
     if (!validateEmail(email)) {
-      return res.status(400).json({ msg: "Invalid Email" });
+      res.status(400).json({ msg: "Invalid Email" });
+      return;
     }
 
     const user = await prisma.user.findUnique({
@@ -37,8 +42,10 @@ export const register = async (
         email,
       },
     });
+
     if (user) {
-      return res.status(400).json({ msg: "This email is already registered" });
+      res.status(400).json({ msg: "This email is already registered" });
+      return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,22 +56,29 @@ export const register = async (
         password: hashedPassword,
       },
     });
-    return res
-      .status(200)
-      .json({ msg: "Congratulations!! Account has been created for you.." });
+
+    res.status(200).json({
+      msg: "Congratulations!! Account has been created for you..",
+    });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
-export const login = async (req: Request, res: Response): Promise<Response> => {
+export const login: RequestHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ status: false, msg: "Please enter all details!!" });
+      res.status(400).json({
+        status: false,
+        msg: "Please enter all details!!",
+      });
+      return;
     }
 
     const user = await prisma.user.findUnique({
@@ -74,24 +88,31 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ status: false, msg: "This email is not registered!!" });
+      res.status(400).json({
+        status: false,
+        msg: "This email is not registered!!",
+      });
+      return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res
-        .status(400)
-        .json({ status: false, msg: "Password incorrect!!" });
+      res.status(400).json({
+        status: false,
+        msg: "Password incorrect!!",
+      });
+      return;
     }
 
-    const userWithoutPassword = { email: user.email, name: user.name };
+    const userWithoutPassword = {
+      email: user.email,
+      name: user.name,
+    };
 
-    const token = createAccessToken(user);
+    const token = createAccessToken(user, res);
 
-    return res.status(200).json({
+    res.status(200).json({
       token,
       user: userWithoutPassword,
       status: true,
@@ -99,8 +120,9 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     });
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ status: false, msg: "Internal Server Error" });
+    res.status(500).json({
+      status: false,
+      msg: "Internal Server Error",
+    });
   }
 };

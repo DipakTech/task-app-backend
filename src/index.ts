@@ -4,12 +4,30 @@ import "dotenv/config";
 import taskRoutes from "./routes/tasksRoutes";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
+const corsOpts = {
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+  credentials: true,
+};
+app.use(cors(corsOpts));
+
+app.use((req: Request, res: Response, next) => {
+  console.log("Incoming request:", {
+    method: req.method,
+    path: req.path,
+    body: req.body,
+    headers: req.headers,
+  });
+  next();
+});
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms"),

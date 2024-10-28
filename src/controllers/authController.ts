@@ -72,6 +72,7 @@ export const login: RequestHandler = async (
 ): Promise<void> => {
   try {
     const { email, password } = req.body;
+    console.log(req.body, "request body..");
 
     if (!email || !password) {
       res.status(400).json({
@@ -122,7 +123,20 @@ export const login: RequestHandler = async (
     console.error(err);
     res.status(500).json({
       status: false,
-      msg: "Internal Server Error",
+      msg: err,
     });
+  }
+};
+
+export const logout: RequestHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    res.clearCookie("token");
+    res.status(200).json({ msg: "Logged out successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Internal Server Error" });
   }
 };

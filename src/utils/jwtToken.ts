@@ -4,9 +4,11 @@ const accessToken = process.env.ACCESS_Token_SECRET!;
 import { Response } from "express";
 
 export const createAccessToken = (payload: User, res: Response) => {
-  const token = jwt.sign(payload, accessToken, { expiresIn: "7d" });
+  const token = jwt.sign(payload, accessToken, { expiresIn: "1D" });
 
   res.cookie("authToken", token, {
     httpOnly: false,
   });
+
+  return token;
 };

@@ -16,15 +16,6 @@ const corsOpts = {
 };
 app.use(cors(corsOpts));
 
-app.use((req: Request, res: Response, next) => {
-  console.log("Incoming request:", {
-    method: req.method,
-    path: req.path,
-    body: req.body,
-    headers: req.headers,
-  });
-  next();
-});
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

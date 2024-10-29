@@ -10,7 +10,7 @@ import {
 } from "../controllers/taskController";
 import { verifyAccessToken } from "../middlewares/verifyToken";
 
-router.get("/", verifyAccessToken, getTasks);
+router.get("/", getTasks);
 router.get("/:taskId", verifyAccessToken, getTask);
 router.post("/", verifyAccessToken, postTask);
 router.put("/:taskId", verifyAccessToken, putTask);

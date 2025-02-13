@@ -8,7 +8,8 @@
     "start:dev": "npm run build && nodemon build/index.js",
     "dev": "nodemon - exec 'ts-node' src/index.ts",
     "start": "npm run build && node build/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall":"npx prisma generate"
   },
   "keywords": [],
   "author": "",
